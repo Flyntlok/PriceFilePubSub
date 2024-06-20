@@ -1,0 +1,47 @@
+-- create subscription table
+CREATE TABLE `price_file_consumption`.`price_update_subscription` (
+  `msg_id` VARCHAR(45) NOT NULL,
+  `subscription_name` VARCHAR(45) NOT NULL,
+  `event_name` VARCHAR(45) NOT NULL,
+  `payload` JSON NOT NULL,
+  PRIMARY KEY (`msg_id`)
+);
+
+-- create topic_subscription_map table
+CREATE TABLE `price_file_consumption`.`topic_subscription_map` (
+  `topic_name` varchar(45) NOT NULL,
+  `subscription_name` varchar(45) NOT NULL,
+  PRIMARY KEY (`topic_name`,`subscription_name`)
+);
+
+-- insert data
+INSERT INTO `price_file_consumption`.`topic_subscription_map` (`topic_name`, `subscription_name`) VALUES ('Item Genome Event', 'price_update_subscription');
+INSERT INTO `price_file_consumption`.`topic_subscription_map` (`topic_name`, `subscription_name`) VALUES ('Item Genome Event', 'global_report');
+
+-- create tenant_price_map table
+CREATE TABLE `price_file_consumption`.`tenant_price_map` (
+  `tenant_id` INT NOT NULL,
+  `distributor_id` INT NULL,
+  `distributor_list_group_id` INT NULL,
+  `distributor_cost_group_id` INT NULL,
+  PRIMARY KEY (`tenant_id`));
+
+  ALTER TABLE `price_file_consumption`.`tenant_price_map` 
+  CHANGE COLUMN `distributor_id` `distributor_id` INT NOT NULL ,
+  CHANGE COLUMN `manufacturer_id` `manufacturer_id` INT NOT NULL ,
+  DROP PRIMARY KEY;
+
+-- insert data for
+INSERT INTO `price_file_consumption`.`tenant_price_map` (`tenant_id`, `distributor_id`, `distributor_list_group_id`, `distributor_cost_group_id`) VALUES ('87', '2', '2', '24');
+INSERT INTO `price_file_consumption`.`tenant_price_map` (`tenant_id`, `distributor_id`, `distributor_list_group_id`, `distributor_cost_group_id`) VALUES ('87', '2', '2', '25');
+INSERT INTO `price_file_consumption`.`tenant_price_map` (`tenant_id`, `distributor_id`, `distributor_list_group_id`, `distributor_cost_group_id`) VALUES ('87', '2', '2', '27');
+INSERT INTO `price_file_consumption`.`tenant_price_map` (`tenant_id`, `distributor_id`, `distributor_list_group_id`, `distributor_cost_group_id`) VALUES ('87', '2', '2', '30');
+ALTER TABLE `price_file_consumption`.`tenant_price_map` 
+
+-- update current p3_make table to add two more columns.
+ALTER TABLE `prod`.`p3_make` 
+ADD COLUMN `distributor_id` INT NULL DEFAULT NULL AFTER `is_distributor`,
+ADD COLUMN `manufacturer_id` INT NULL DEFAULT NULL AFTER `distributor_id`;
+
+-- insert distributor_id and manufacturer_id for t87, echo.
+UPDATE `prod`.`p3_make` SET `distributor_id` = '2', `manufacturer_id` = '2' WHERE (`ID` = '15734') and (`Make` = 'Echo');

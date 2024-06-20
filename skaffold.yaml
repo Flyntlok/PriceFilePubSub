@@ -1,0 +1,24 @@
+apiVersion: skaffold/v4beta2
+kind: Config
+metadata:
+  name: pricefile-pubsub-cron
+build:
+  tagPolicy:
+    gitCommit:
+      ignoreChanges: true
+      variant: CommitSha
+  artifacts:
+    - image: us-central1-docker.pkg.dev/parker-3000---craig-taylor/staging/pricefile-pubsub-cron
+      docker:
+        dockerfile: Dockerfile
+profiles:
+  - name: prod
+    manifests:
+      kustomize:
+        paths:
+          - ./k8s/production/
+  - name: staging
+    manifests:
+      kustomize:
+        paths:
+          - ./k8s/staging/

@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: incoming-event-messages-cron
+  namespace: staging
+spec:
+  selector:
+    matchLabels:
+      app: incoming-event-messages-cron
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: incoming-event-messages-cron
+    spec:
+      containers:
+      - name: incoming-event-messages-cron
+        image: us-central1-docker.pkg.dev/parker-3000---craig-taylor/staging/incoming-event-messages-cron
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 50101
+        env:
+          - name: ENVIRONMENT
+            value: DEVELOPMENT
+          - name: DB_HOST
+            value: cloudsql-proxy
+          - name: DB_SCHEMA
+            value: prod
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: cloudsql-db-credentials
+                key: username
+          - name: DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: cloudsql-db-credentials
+                key: password
+          - name: GRAVITY_EVENTS_PUBSUB_TOPIC
+            value: gravity-events-staging
+          - name: EVENT_MESSAGES_READ
+            value: '50'
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /var/secrets/google/key.json
+          - name: TWILIO_EVENTS_PUBSUB_TOPIC
+            value: twilio-events-staging
+        volumeMounts:
+          - name: pubsub-unified-key
+            mountPath: /var/secrets/google
+        resources:
+          limits:
+            memory: 50Mi
+            cpu: 50m
+          requests:
+            memory: 10Mi
+            cpu: 10m
+      volumes:
+        - name: pubsub-unified-key
+          secret:
+            secretName: pubsub-unified-key

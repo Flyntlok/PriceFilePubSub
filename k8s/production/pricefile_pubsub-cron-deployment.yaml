@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pricefile-pubsub-cron
+  namespace: production
+spec:
+  selector:
+    matchLabels:
+      app: pricefile-pubsub-cron
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: pricefile-pubsub-cron
+    spec:
+      containers:
+      - name: pricefile-pubsub-cron
+        image: us-central1-docker.pkg.dev/parker-3000---craig-taylor/staging/pricefile-pubsub-cron
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 50101
+        env:
+          - name: ENVIRONMENT
+            value: PRODUCTION
+          - name: DB_HOST
+            value: cloudsql-proxy
+          - name: DB_SCHEMA
+            value: prod
+          - name: DB_USER
+            value: incoming_event_messages
+          - name: DB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: cloudsql-db-credentials
+                key: password
+        resources:
+          limits:
+            memory: 80Mi
+            cpu: 50m
+          requests:
+            memory: 10Mi
+            cpu: 10m

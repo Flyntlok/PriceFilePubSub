@@ -1,0 +1,42 @@
+steps:
+  # Build
+  - name: gcr.io/k8s-skaffold/skaffold
+    args:
+      - skaffold
+      - build
+      - '--interactive=false'
+      - '--file-output=/workspace/artifacts.json'
+
+  # Latest tagging 
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'container'
+      - 'images'
+      - 'add-tag'
+      - '--quiet'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/staging/pricefile-pubsub-cron:$COMMIT_SHA'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/staging/pricefile-pubsub-cron:latest'
+
+  # Deploy Release
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      [
+        "deploy", "releases", "create", "rel-${SHORT_SHA}",
+        "--delivery-pipeline", "pricefile-pubsub-cron-pipeline",
+        "--region", "us-central1",
+        "--annotations", "commitId=${REVISION_ID}",
+        "--build-artifacts", "/workspace/artifacts.json"
+      ]
+
+  # Create release in Google Cloud Deploy(Auto Promote from Staging to Production)
+  # - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+  #   entrypoint: gcloud
+  #   args:
+  #     [
+  #       'deploy', 'releases', 'promote',
+  #       '--release', 'rel-${SHORT_SHA}',
+  #       '--delivery-pipeline', 'pricefile-pubsub-cron-pipeline',
+  #       '--region', 'us-central1',
+  #       '--to-target', 'pricefile-pubsub-cron-multi-prods'
+  #     ]

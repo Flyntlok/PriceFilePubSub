@@ -1,0 +1,50 @@
+apiVersion: deploy.cloud.google.com/v1
+kind: DeliveryPipeline
+metadata:
+  name: pricefile-pubsub-cron-pipeline
+description: pricefile-pubsub-cron cicd pipeline
+serialPipeline:
+  stages:
+  - targetId: pricefile-pubsub-cron-staging
+    profiles:
+    - staging
+  - targetId: pricefile-pubsub-cron-multi-prods
+    profiles:
+    - prod
+---
+
+apiVersion: deploy.cloud.google.com/v1
+kind: Target
+metadata:
+ name: pricefile-pubsub-cron-multi-prods
+description: pricefile-pubsub-cron multiple prod clusters
+multiTarget:
+ targetIds: [ pricefile-pubsub-cron-prod-us ]
+---
+
+apiVersion: deploy.cloud.google.com/v1
+kind: Target
+metadata:
+  name: pricefile-pubsub-cron-staging
+description: pricefile-pubsub-cron staging
+gke:
+  cluster: projects/parker-3000---craig-taylor/locations/us-central1-a/clusters/revere
+---
+
+apiVersion: deploy.cloud.google.com/v1
+kind: Target
+metadata:
+  name: pricefile-pubsub-cron-prod-us
+description: us production cluster
+gke:
+  cluster: projects/parker-3000---craig-taylor/locations/us-central1-a/clusters/the-snoasis
+
+---
+
+apiVersion: deploy.cloud.google.com/v1
+kind: Target
+metadata:
+  name: pricefile-pubsub-cron-prod-aus
+description: australia production cluster
+gke:
+  cluster: projects/flyntlok-australia/locations/australia-southeast1-a/clusters/australia-production

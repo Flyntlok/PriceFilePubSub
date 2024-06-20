@@ -1,0 +1,8 @@
+FROM node:14
+COPY / /usr/local/app
+WORKDIR /usr/local/app
+
+RUN yarn
+RUN yarn run build
+
+CMD [ "node", "-r", "source-map-support/register", "dist/server.js" ]
