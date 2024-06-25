@@ -171,7 +171,7 @@ async function handleConsume() {
           // 2. prepare data
           // get tenant pricing group ids
           const [[priceGroupIds]] = await mysqlConn.query<PriceGrpupIds[]>(
-            ` CALL price_file_consumption.Get_Tenant_Pricing_Group_IDs_v2(?, ?);
+            ` CALL price_file_consumption.Get_Tenant_Pricing_Group_IDs(?, ?);
             `,
             [tenant_id, distributor_id]
           );
